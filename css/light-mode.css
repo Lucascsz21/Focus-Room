@@ -1,0 +1,32 @@
+/* ===== LIGHT-MODE.CSS ===== */
+
+body {
+  background-color: #f4f4f4;
+  color: #636363;
+}
+
+#translateButton,
+#musicButton,
+#themeButton {
+  background-color: #636363;
+  color: #f6f2e5;
+}
+
+#translateButton:hover,
+#musicButton:hover,
+#themeButton:hover {
+  background-color: #444;
+}
+
+.language-options {
+  background-color: #fff;
+}
+
+.language-option {
+  background-color: #fff;
+  color: #636363;
+}
+
+.language-option:hover {
+  background-color: #ebebeb;
+}

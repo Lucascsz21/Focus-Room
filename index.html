@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <title>Focus Room</title>
+    <link rel="stylesheet" href="css/base.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="translation-button">
+        <button id="translateButton" aria-label="Change language">
+          <i class="fas fa-language"></i>
+        </button>
+        <div class="language-options" id="languageDropdown">
+          <button class="language-option" data-lang="en-US">English</button>
+          <button class="language-option" data-lang="es-ES">Español</button>
+          <button class="language-option" data-lang="fr-FR">Français</button>
+          <button class="language-option" data-lang="pt-BR">Português</button>
+          <button class="language-option" data-lang="ko-KR">한국어</button>
+        </div>
+      </div>
+
+      <!-- Relógio (canto superior direito) -->
+      <div class="clock-display">
+        <p id="clock" class="clock"></p>
+      </div>
+
+      <!-- Data (centro da tela) -->
+      <div class="date-display">
+        <p id="date" class="date"></p>
+      </div>
+
+      <div class="theme-button">
+        <button id="themeButton" aria-label="Toggle theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+
+      <div class="music-button">
+        <button id="musicButton" aria-label="Toggle music">
+          <i class="fas fa-volume-mute"></i>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // ===== TEMA =====
+      const themeButton = document.getElementById("themeButton");
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      let isDark = localStorage.getItem("theme")
+        ? localStorage.getItem("theme") === "dark"
+        : systemPrefersDark;
+
+      function applyTheme() {
+        document.body.classList.toggle("dark", isDark);
+        themeButton.querySelector("i").className = isDark
+          ? "fas fa-sun"
+          : "fas fa-moon";
+      }
+
+      themeButton.addEventListener("click", () => {
+        isDark = !isDark;
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        applyTheme();
+      });
+
+      applyTheme();
+
+      // ===== IDIOMA =====
+      const translateButton = document.getElementById("translateButton");
+      const languageDropdown = document.getElementById("languageDropdown");
+      const languageOptions = document.querySelectorAll(".language-option");
+      let selectedLanguage =
+        localStorage.getItem("selectedLanguage") || "pt-BR";
+
+      translateButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        languageDropdown.classList.toggle("show");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (
+          !translateButton.contains(e.target) &&
+          !languageDropdown.contains(e.target)
+        ) {
+          languageDropdown.classList.remove("show");
+        }
+      });
+
+      languageOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+          selectedLanguage = option.getAttribute("data-lang");
+          localStorage.setItem("selectedLanguage", selectedLanguage);
+          languageDropdown.classList.remove("show");
+          updateDisplay();
+        });
+      });
+
+      // ===== RELÓGIO E DATA =====
+      function updateDisplay() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+
+        let clockText;
+        if (selectedLanguage === "ko-KR") {
+          const ampm = hours >= 12 ? "오후" : "오전";
+          clockText = `${ampm} ${hours % 12 || 12}:${minutes}`;
+        } else {
+          const ampm = hours >= 12 ? "PM" : "AM";
+          clockText = `${hours % 12 || 12}:${minutes} ${ampm}`;
+        }
+
+        document.getElementById("clock").textContent = clockText;
+        document.getElementById("date").textContent = now.toLocaleDateString(
+          selectedLanguage,
+          { weekday: "long", month: "long", day: "numeric" },
+        );
+      }
+
+      updateDisplay();
+      setInterval(updateDisplay, 1000);
+
+      // ===== MÚSICA =====
+      const musicButton = document.getElementById("musicButton");
+      const audioElement = new Audio("assets/music.mp3");
+      audioElement.loop = true;
+      let isMusicPlaying = false;
+
+      function updateMusicIcon() {
+        musicButton.querySelector("i").className = isMusicPlaying
+          ? "fas fa-volume-up"
+          : "fas fa-volume-mute";
+      }
+
+      musicButton.addEventListener("click", () => {
+        if (isMusicPlaying) {
+          audioElement.pause();
+          isMusicPlaying = false;
+          updateMusicIcon();
+        } else {
+          audioElement
+            .play()
+            .then(() => {
+              isMusicPlaying = true;
+              updateMusicIcon();
+            })
+            .catch((err) => {
+              console.warn("Não foi possível reproduzir o áudio:", err);
+            });
+        }
+      });
+
+      updateMusicIcon();
+    </script>
+  </body>
+</html>
